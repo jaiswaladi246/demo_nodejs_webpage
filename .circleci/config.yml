@@ -1,0 +1,30 @@
+version: 2.1
+jobs:
+  build_test:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - run:
+          name: Install npm dependencies
+          command: |
+            npm install --save	
+  build_docker_image:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t nodejswebapp1 -t artisenzubair/tomcatlast:latest .
+            echo $DOCKER_PASSWORD | docker login -u artisenzubair --password-stdin
+            docker push artisenzubair/tomcatlast:latest
+
+workflows:
+  build_test:
+    jobs:
+      - build_test
+      - build_docker_image
